@@ -130,7 +130,7 @@ else:
             r=row.iloc[0]
             exit_price = float(r['last']); pnl = float(r['unreal_pnl'])
             close_position(int(r['id']), exit_price, pnl)
-            st.success(f'Position {int(r['id'])} clôturée. PnL ~ {pnl:.2f}')
+            st.success(f"Position {int(r['id'])} clôturée. PnL ≈ {pnl:.2f}")
             st.rerun()
     if st.button('🔄 Rafraîchir P&L'):
         st.rerun()
