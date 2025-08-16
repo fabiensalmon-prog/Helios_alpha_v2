@@ -22,9 +22,11 @@ try:
 except Exception as e:
     st.stop()
 
-# Stratégies & recherche
+# Stratégies & recherche (chargement dynamique, plus besoin de ALL)
+from importlib import import_module
+import pkgutil
+
 try:
-    from src.strategies import ALL as STRATS
     from src.research.ensemble import ensemble_weights, blended_signal
     try:
         from src.research.regime import kmeans_regime
@@ -32,7 +34,44 @@ try:
     except Exception:
         HAS_REGIME = False
 except Exception as e:
-    st.error(f"Import stratégies/recherche impossible: {e}")
+    st.error(f"Import recherche impossible: {e}")
+    st.stop()
+
+# 🔎 Détecte automatiquement toutes les stratégies présentes dans src/strategies
+STRATS = {}
+try:
+    pkg = import_module("src.strategies")     # doit exister : src/strategies/
+    for _, modname, ispkg in pkgutil.iter_modules(pkg.__path__):
+        if ispkg or modname in ("__init__", "all"):   # ignore sous-packages et all.py
+            continue
+        m = import_module(f"src.strategies.{modname}")
+        # Cherche une fonction de signal plausible
+        candidates = (
+            "signal",
+            f"{modname}_signal",
+            "ema_trend_signal", "macd_momentum_signal", "donchian_breakout_signal",
+            "boll_mr_signal", "kama_trend_signal", "rsi_reversion_signal",
+            "ichimoku_signal", "supertrend_signal", "atr_channel_signal",
+        )
+        fn = next((getattr(m, c) for c in candidates if hasattr(m, c)), None)
+        if callable(fn):
+            pretty = modname.replace("_", " ").title()
+            # quelques jolis noms connus
+            pretty = {
+                "Ema Trend": "EMA Trend",
+                "Macd": "MACD Momentum",
+                "Donchian": "Donchian Breakout",
+                "Boll Mr": "Bollinger MR",
+                "Atr Channel": "ATR Channel",
+                "Supertrend": "SuperTrend",
+            }.get(pretty, pretty)
+            STRATS[pretty] = fn
+except Exception as e:
+    st.error(f"Chargement des stratégies impossible : {e}")
+    st.stop()
+
+if not STRATS:
+    st.error("Aucune stratégie détectée dans src/strategies/.")
     st.stop()
 
 # Risque & backtest
