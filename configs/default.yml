@@ -1,0 +1,27 @@
+app:
+  symbols: [BTC/USDT, ETH/USDT, BNB/USDT, SOL/USDT, XRP/USDT, ADA/USDT, DOGE/USDT, AVAX/USDT, LINK/USDT, TON/USDT]
+  timeframes: [15m, 1h, 4h]
+  exchange: okx
+  top_k: 5
+
+risk_modes:
+  Conservative:
+    risk_pct: 0.5
+    max_gross_pct: 50.0
+    min_rr: 1.2
+    max_positions: 2
+  Balanced:
+    risk_pct: 1.0
+    max_gross_pct: 80.0
+    min_rr: 1.5
+    max_positions: 3
+  Aggressive:
+    risk_pct: 2.0
+    max_gross_pct: 120.0
+    min_rr: 1.8
+    max_positions: 5
+
+risk:
+  atr_k_sl: 2.5
+  atr_k_tp: 3.5
+  risk_pct_custom: 1.0
